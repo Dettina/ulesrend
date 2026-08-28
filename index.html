@@ -183,13 +183,25 @@ button,input{font:inherit;color:inherit}
   width:308px;flex:none;background:var(--surface);border-left:1px solid var(--line);
   display:flex;flex-direction:column;min-height:0;
 }
-.rail header{padding:16px 18px 12px;border-bottom:1px solid var(--line-soft)}
-.rail h2{
-  margin:0 0 3px;font-family:"EB Garamond",Georgia,serif;font-size:21px;font-weight:500;line-height:1;
+.railhead{
+  display:flex;align-items:baseline;gap:12px;width:100%;text-align:left;
+  padding:15px 18px 13px;background:transparent;border:0;border-bottom:1px solid var(--line-soft);
+  cursor:default;
 }
-.rail .hint{margin:0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.rh-title{
+  font-family:"EB Garamond",Georgia,serif;font-size:21px;font-weight:500;line-height:1;
+  color:var(--ink);
+}
+.rh-count{
+  flex:1;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+}
+.rh-count[data-warn="1"]{color:#c07a3e}
+.chev{display:none}
+
+.railbody{display:flex;flex-direction:column;min-height:0;flex:1}
+.searchwrap{padding:12px 18px 10px;border-bottom:1px solid var(--line-soft)}
 .search{
-  margin:11px 0 0;width:100%;padding:7px 10px;background:var(--ground);
+  width:100%;padding:7px 10px;background:var(--ground);
   border:1px solid var(--line);border-radius:3px;font-size:12.5px;
 }
 .search::placeholder{color:var(--faint)}
@@ -235,8 +247,6 @@ button,input{font:inherit;color:inherit}
 }
 .cue button:hover{opacity:1}
 
-.railtoggle{display:none}
-
 /* ---------- mobile ---------- */
 @media (max-width:820px){
   .bar{padding:10px 14px;gap:12px}
@@ -246,16 +256,31 @@ button,input{font:inherit;color:inherit}
   .planwrap{padding:14px}
   .rail{
     width:auto;border-left:0;border-top:1px solid var(--line);
-    max-height:46dvh;
+    max-height:52dvh;
   }
-  .rail[hidden]{display:none}
-  .railtoggle{display:inline-flex}
+  .railhead{
+    cursor:pointer;align-items:center;padding:14px 16px;
+    border-bottom-color:transparent;
+  }
+  .railhead:active{background:var(--surface-2)}
+  .rail[data-open="1"] .railhead{border-bottom-color:var(--line-soft)}
+  .chev{
+    display:block;flex:none;width:9px;height:9px;
+    border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);
+    transform:rotate(-135deg);transform-origin:60% 60%;
+    transition:transform .18s ease;
+  }
+  .rail[data-open="1"] .chev{transform:rotate(45deg)}
+  .rail[data-open="0"]{max-height:none;flex:none}
+  .rail[data-open="0"] .railbody{display:none}
+  .cue{bottom:64px}
 }
+@media (prefers-reduced-motion:reduce){.chev{transition:none}}
 
 /* ---------- print ---------- */
 @media print{
   :root{--ground:#fff;--surface:#fff;--surface-2:#fff}
-  .rail,.tools,.save,.cue,.railtoggle{display:none !important}
+  .rail,.tools,.save,.cue{display:none !important}
   .app{height:auto;overflow:visible}
   .planwrap{overflow:visible;padding:0;background:#fff}
   .bar{border-bottom:1px solid #ccc}
@@ -283,8 +308,6 @@ button,input{font:inherit;color:inherit}
       <button class="btn" id="zoomFit">Illeszt</button>
       <button class="btn icon" id="zoomIn" title="Nagyítás" aria-label="Nagyítás">+</button>
       <button class="btn" id="undoBtn" disabled>Vissza</button>
-      <button class="btn" id="printBtn">Nyomtatás</button>
-      <button class="btn railtoggle" id="railToggle">Vendégek</button>
     </div>
   </div>
 
@@ -293,19 +316,23 @@ button,input{font:inherit;color:inherit}
       <div class="sizer" id="sizer"><div class="plan" id="plan"></div></div>
     </div>
 
-    <aside class="rail" id="rail">
-      <header>
-        <h2>Vendégek</h2>
-        <p class="hint">Válassz egy nevet, majd kattints egy helyre. Egérrel húzni is lehet. Foglalt helyre kattintva felszabadul.</p>
-        <input class="search" id="search" type="search" placeholder="Keresés név szerint…" autocomplete="off">
-      </header>
-      <div class="list" id="list"></div>
-      <div class="railfoot">
-        <button class="btn" id="autoBtn">Üresekre ültet</button>
-        <button class="btn" id="exportBtn">Biztonsági mentés</button>
-        <button class="btn" id="importBtn">Visszatöltés</button>
-        <button class="btn danger" id="resetBtn">Eredeti ültetés</button>
-        <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <aside class="rail" id="rail" data-open="1">
+      <button class="railhead" id="railHead" type="button" aria-expanded="true" aria-controls="railBody">
+        <span class="rh-title">Vendégek</span>
+        <span class="rh-count" id="railCount"></span>
+        <span class="chev" aria-hidden="true"></span>
+      </button>
+      <div class="railbody" id="railBody">
+        <div class="searchwrap">
+          <input class="search" id="search" type="search" placeholder="Keresés név szerint…" autocomplete="off">
+        </div>
+        <div class="list" id="list"></div>
+        <div class="railfoot">
+          <button class="btn" id="exportBtn">Biztonsági mentés</button>
+          <button class="btn" id="importBtn">Visszatöltés</button>
+          <button class="btn danger" id="resetBtn">Eredeti ültetés</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
       </div>
     </aside>
   </div>
@@ -512,6 +539,12 @@ button,input{font:inherit;color:inherit}
     $("statSeated").textContent = String(n);
     $("statFree").textContent = String(TOTAL_SEATS - n);
     $("undoBtn").disabled = history.length === 0;
+
+    var without = NAMES.length - n;
+    var rc = $("railCount");
+    rc.textContent = without > 0 ? (without + " fő helye hiányzik") : (NAMES.length + " fő");
+    rc.dataset.warn = without > 0 ? "1" : "0";
+
     var cue = $("cue");
     if (selected){
       cue.classList.add("on");
@@ -575,12 +608,20 @@ button,input{font:inherit;color:inherit}
     }
   });
 
+  function setRailOpen(open){
+    var r = $("rail");
+    r.dataset.open = open ? "1" : "0";
+    $("railHead").setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
   list.addEventListener("click", function(e){
     var el = e.target.closest(".guest");
     if (!el) return;
     var gid = el.dataset.guest;
     selected = (selected === gid) ? null : gid;
     render();
+    // on a phone, fold the panel away so the room is visible for the next tap
+    if (selected && window.innerWidth < 820) setRailOpen(false);
   });
 
   $("cueCancel").addEventListener("click", function(){ selected = null; render(); });
@@ -635,29 +676,11 @@ button,input{font:inherit;color:inherit}
   $("search").addEventListener("input", function(e){ query = e.target.value; renderList(); });
 
   $("undoBtn").addEventListener("click", undo);
-  $("printBtn").addEventListener("click", function(){ window.print(); });
-  $("railToggle").addEventListener("click", function(){
-    var r = $("rail");
-    r.hidden = !r.hidden;
-  });
 
-  $("autoBtn").addEventListener("click", function(){
-    var free = [];
-    for (var i = 0; i < NAMES.length; i++){ if (!seatOf("g" + i)) free.push("g" + i); }
-    if (!free.length) return;
-    pushHistory();
-    var fi = 0;
-    for (var a = 0; a < TABLES.length && fi < free.length; a++){
-      var t = TABLES[a];
-      if (t.kind === "head") continue;
-      for (var s = 0; s < t.seats && fi < free.length; s++){
-        var k = seatKey(t.id, s);
-        if (!seats[k]) seats[k] = free[fi++];
-      }
-    }
-    selected = null;
-    render();
-    scheduleSave();
+  // the guest panel folds away on narrow screens; on desktop it is always open
+  $("railHead").addEventListener("click", function(){
+    if (window.innerWidth >= 820) return;
+    setRailOpen($("rail").dataset.open !== "1");
   });
 
   $("resetBtn").addEventListener("click", function(){
@@ -693,6 +716,10 @@ button,input{font:inherit;color:inherit}
     // on a phone the whole room at once is unreadable — start legible and let it scroll
     if (window.innerWidth < 820){ zoom = 0.55; applyZoom(); }
     else fit();
+  }
+
+  function initialRail(){
+    if (window.innerWidth < 820) setRailOpen(false);
   }
 
   var prevZoom = null;
@@ -794,6 +821,7 @@ button,input{font:inherit;color:inherit}
     adopt(readLocal());
     render();
     initialZoom();
+    initialRail();
     loaded = true;
     setSave("idle", "Mentve ebben a böngészőben");
   }
