@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detti &amp; Dávid ülésrend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Karla:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --ground:#ece5d9;
+  --surface:#fbf7f0;
+  --surface-2:#f4eee3;
+  --ink:#2f2c27;
+  --ink-soft:#5d574d;
+  --muted:#8a8175;
+  --faint:#b3a99a;
+  --line:#ddd2c0;
+  --line-soft:#e7dece;
+  --accent:#5b6b52;
+  --accent-deep:#3f4c38;
+  --accent-wash:#e6ebdf;
+  --accent-line:#c3cdb6;
+  --shadow:0 1px 2px rgba(63,54,38,.06), 0 6px 18px rgba(63,54,38,.05);
+  --focus:#5b6b52;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#1e1c19;
+    --surface:#272420;
+    --surface-2:#2f2b26;
+    --ink:#ece6da;
+    --ink-soft:#c4bcae;
+    --muted:#968c7e;
+    --faint:#6b6357;
+    --line:#3b362e;
+    --line-soft:#332f28;
+    --accent:#9db089;
+    --accent-deep:#b6c7a2;
+    --accent-wash:#2f3830;
+    --accent-line:#4a5844;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.22);
+    --focus:#9db089;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#1e1c19;
+  --surface:#272420;
+  --surface-2:#2f2b26;
+  --ink:#ece6da;
+  --ink-soft:#c4bcae;
+  --muted:#968c7e;
+  --faint:#6b6357;
+  --line:#3b362e;
+  --line-soft:#332f28;
+  --accent:#9db089;
+  --accent-deep:#b6c7a2;
+  --accent-wash:#2f3830;
+  --accent-line:#4a5844;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.22);
+  --focus:#9db089;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Karla","Helvetica Neue",Arial,sans-serif;
+  font-size:14px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+
+.app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+
+/* ---------- top bar ---------- */
+.bar{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:12px 20px;background:var(--surface);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:baseline;gap:14px;min-width:0}
+.brand h1{
+  margin:0;font-family:"EB Garamond",Georgia,serif;
+  font-size:27px;font-weight:500;letter-spacing:.005em;line-height:1;
+  text-wrap:balance;
+}
+.brand .sub{
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap;
+}
+.bar .spacer{flex:1 1 auto}
+.stat{display:flex;align-items:baseline;gap:7px;white-space:nowrap}
+.stat b{
+  font-family:"EB Garamond",Georgia,serif;font-size:22px;font-weight:600;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.stat span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+.tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn{
+  background:transparent;border:1px solid var(--line);border-radius:3px;
+  padding:6px 11px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);cursor:pointer;white-space:nowrap;
+  transition:background .12s ease,border-color .12s ease,color .12s ease;
+}
+.btn:hover:not(:disabled){background:var(--surface-2);border-color:var(--accent-line);color:var(--ink)}
+.btn:disabled{opacity:.38;cursor:default}
+.btn.icon{padding:6px 9px;font-size:13px;letter-spacing:0;text-transform:none;line-height:1}
+.btn.danger:hover:not(:disabled){border-color:#a8563f;color:#a8563f}
+
+.save{
+  display:flex;align-items:center;gap:7px;font-size:11px;
+  letter-spacing:.06em;color:var(--muted);white-space:nowrap;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
+.save[data-s="saving"] .dot{background:#c9a227;animation:pulse 1s ease-in-out infinite}
+.save[data-s="local"] .dot{background:#c07a3e}
+.save[data-s="error"] .dot{background:#a8563f}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.save .dot{animation:none}}
+
+/* ---------- body ---------- */
+.main{flex:1;display:flex;min-height:0}
+.planwrap{
+  flex:1;min-width:0;overflow:auto;padding:26px;
+  display:grid;place-content:safe center;
+  background:
+    radial-gradient(circle at 1px 1px, var(--line-soft) 1px, transparent 0) 0 0/24px 24px,
+    var(--ground);
+}
+.sizer{position:relative}
+.plan{position:absolute;inset:0 auto auto 0;transform-origin:0 0}
+
+.table{
+  position:absolute;background:var(--surface);border:1px solid var(--line);
+  border-radius:3px;padding:8px 9px 9px;box-shadow:var(--shadow);
+}
+.table.head{border-color:var(--accent-line);background:var(--surface)}
+.table .thead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px}
+.table .tname{
+  font-family:"EB Garamond",Georgia,serif;font-size:15px;font-weight:600;line-height:1;
+}
+.table.head .tname{color:var(--accent-deep)}
+.table .tocc{
+  font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);
+  font-variant-numeric:tabular-nums;
+}
+.table .tocc.full{color:var(--accent)}
+.seats{display:grid;gap:5px}
+
+.seat{
+  display:flex;align-items:center;gap:6px;height:23px;padding:0 6px;
+  border:1px solid var(--line);border-radius:2px;background:var(--surface-2);
+  font-size:11px;cursor:pointer;overflow:hidden;text-align:left;width:100%;
+  transition:border-color .12s ease,background .12s ease;
+}
+.seat .n{color:var(--faint);flex:none;font-variant-numeric:tabular-nums;font-size:10px}
+.seat .who{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.seat.empty{border-style:dashed;background:transparent}
+.seat.empty .who{color:var(--faint)}
+.seat.taken{background:var(--accent-wash);border-color:var(--accent-line)}
+.seat.taken .who{color:var(--ink);font-weight:500}
+.seat.taken .n{color:var(--accent)}
+.seat:hover{border-color:var(--accent);border-style:solid}
+.seat.drop{border-color:var(--accent);border-style:solid;background:var(--accent-wash);box-shadow:0 0 0 2px var(--accent-wash)}
+.seat.hit{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-line)}
+
+.prop{
+  position:absolute;border:1px dashed var(--line);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--faint);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+}
+.prop.vert span{writing-mode:vertical-rl;transform:rotate(180deg)}
+
+/* ---------- rail ---------- */
+.rail{
+  width:308px;flex:none;background:var(--surface);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;
+}
+.rail header{padding:16px 18px 12px;border-bottom:1px solid var(--line-soft)}
+.rail h2{
+  margin:0 0 3px;font-family:"EB Garamond",Georgia,serif;font-size:21px;font-weight:500;line-height:1;
+}
+.rail .hint{margin:0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.search{
+  margin:11px 0 0;width:100%;padding:7px 10px;background:var(--ground);
+  border:1px solid var(--line);border-radius:3px;font-size:12.5px;
+}
+.search::placeholder{color:var(--faint)}
+.list{flex:1;overflow:auto;padding:6px 10px 14px}
+.grouphead{
+  padding:12px 8px 5px;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--faint);display:flex;justify-content:space-between;gap:8px;
+}
+.guest{
+  display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;
+  padding:7px 9px;border:1px solid transparent;border-radius:3px;
+  background:transparent;cursor:pointer;
+}
+.guest:hover{background:var(--surface-2)}
+.guest[data-sel="1"]{background:var(--accent-wash);border-color:var(--accent-line)}
+.guest .gn{font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.guest[data-sel="1"] .gn{font-weight:600}
+.guest .gt{font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);flex:none}
+.guest.unseated .gt{color:#c07a3e}
+.empty-note{padding:14px 9px;font-size:12px;color:var(--muted);line-height:1.55}
+
+.railfoot{
+  padding:11px 14px;border-top:1px solid var(--line-soft);
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+
+/* ---------- selection banner ---------- */
+.cue{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+  background:var(--accent-deep);color:#f6f3ea;
+  padding:9px 16px;border-radius:3px;font-size:12.5px;
+  box-shadow:0 6px 22px rgba(0,0,0,.22);z-index:40;
+  display:none;align-items:center;gap:12px;max-width:calc(100vw - 32px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cue{color:#1e1c19}}
+:root[data-theme="dark"] .cue{color:#1e1c19}
+.cue.on{display:flex}
+.cue b{font-weight:700}
+.cue button{
+  background:transparent;border:1px solid currentColor;border-radius:2px;
+  padding:2px 8px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;opacity:.8;
+}
+.cue button:hover{opacity:1}
+
+.railtoggle{display:none}
+
+/* ---------- mobile ---------- */
+@media (max-width:820px){
+  .bar{padding:10px 14px;gap:12px}
+  .brand h1{font-size:22px}
+  .brand .sub{display:none}
+  .main{flex-direction:column}
+  .planwrap{padding:14px}
+  .rail{
+    width:auto;border-left:0;border-top:1px solid var(--line);
+    max-height:46dvh;
+  }
+  .rail[hidden]{display:none}
+  .railtoggle{display:inline-flex}
+}
+
+/* ---------- print ---------- */
+@media print{
+  :root{--ground:#fff;--surface:#fff;--surface-2:#fff}
+  .rail,.tools,.save,.cue,.railtoggle{display:none !important}
+  .app{height:auto;overflow:visible}
+  .planwrap{overflow:visible;padding:0;background:#fff}
+  .bar{border-bottom:1px solid #ccc}
+  .table{box-shadow:none;border-color:#bbb}
+  .seat{border-color:#ccc}
+  .seat.taken{background:#f2f2ee}
+  @page{size:landscape;margin:12mm}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="bar">
+    <div class="brand">
+      <h1>Ülésrend</h1>
+      <div class="sub">Detti &amp; Dávid · 2026. szeptember 12.</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="stat"><b id="statSeated">0</b><span>leültetve</span></div>
+    <div class="stat"><b id="statFree">0</b><span>szabad hely</span></div>
+    <div class="save" id="saveBox" data-s="idle"><span class="dot"></span><span id="saveTxt">Mentve</span></div>
+    <div class="tools">
+      <button class="btn icon" id="zoomOut" title="Kicsinyítés" aria-label="Kicsinyítés">−</button>
+      <button class="btn" id="zoomFit">Illeszt</button>
+      <button class="btn icon" id="zoomIn" title="Nagyítás" aria-label="Nagyítás">+</button>
+      <button class="btn" id="undoBtn" disabled>Vissza</button>
+      <button class="btn" id="printBtn">Nyomtatás</button>
+      <button class="btn railtoggle" id="railToggle">Vendégek</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="planwrap" id="planwrap">
+      <div class="sizer" id="sizer"><div class="plan" id="plan"></div></div>
+    </div>
+
+    <aside class="rail" id="rail">
+      <header>
+        <h2>Vendégek</h2>
+        <p class="hint">Válassz egy nevet, majd kattints egy helyre. Egérrel húzni is lehet. Foglalt helyre kattintva felszabadul.</p>
+        <input class="search" id="search" type="search" placeholder="Keresés név szerint…" autocomplete="off">
+      </header>
+      <div class="list" id="list"></div>
+      <div class="railfoot">
+        <button class="btn" id="autoBtn">Üresekre ültet</button>
+        <button class="btn" id="exportBtn">Biztonsági mentés</button>
+        <button class="btn" id="importBtn">Visszatöltés</button>
+        <button class="btn danger" id="resetBtn">Eredeti ültetés</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="cue" id="cue">
+  <span id="cueTxt"></span>
+  <button id="cueCancel">Mégse</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var NAMES = ["Detti","Dávid","Andi","Józsi","Krisztián","Babi","Zoli","Pizsu","Gabi","Mariann","Kati","András","Bori","Márti","Ákos","Zsolti","Zsófi","János","Tomi","Kitti","Attila","Bea","Tibi","Balázs","Vivi","Barni","Anita","Sasha","Dani","Fiona","Benyó","Eszti","Bence","Dorka","Ákos","Panka","Szabi","Dorka","Gézu","Csilla","Zoli","Á. Zoli","Á. Hanna","Á. Ida","Csenge","Gábor","Lea"];
+
+  var DEFAULT_SEATS = {"h:0":"g0","h:1":"g1","t1:0":"g7","t1:1":"g8","t1:2":"g12","t1:3":"g9","t2:0":"g10","t2:1":"g35","t2:2":"g11","t2:3":"g36","t3:0":"g33","t3:1":"g39","t3:2":"g38","t3:3":"g6","t4:0":"g32","t4:1":"g30","t4:3":"g31","t5:0":"g41","t5:1":"g43","t5:2":"g42","t6:0":"g15","t6:1":"g17","t6:2":"g16","t6:3":"g46","t7:0":"g2","t7:2":"g40","t7:3":"g3","t7:4":"g4","t7:5":"g5","t8:0":"g19","t8:1":"g21","t8:2":"g22","t8:3":"g18","t8:4":"g20","t8:5":"g23","t11:0":"g25","t11:1":"g26","t11:2":"g28","t11:3":"g24","t11:4":"g27","t11:5":"g29","t12:0":"g44","t12:1":"g13","t12:2":"g37","t12:3":"g45","t12:4":"g14","t12:5":"g34"};
+
+  var TABLES = [
+    {id:"h",  label:"Főasztal", kind:"head", seats:2, x:1040, y:100},
+    {id:"t1", label:"1",  kind:"rect", seats:4, x:1290, y:210},
+    {id:"t2", label:"2",  kind:"rect", seats:4, x:1530, y:210},
+    {id:"t3", label:"3",  kind:"rect", seats:4, x:1780, y:210},
+    {id:"t4", label:"4",  kind:"rect", seats:4, x:1780, y:390},
+    {id:"t5", label:"5",  kind:"rect", seats:4, x:1530, y:390},
+    {id:"t6", label:"6",  kind:"rect", seats:4, x:1280, y:390},
+    {id:"t7", label:"7",  kind:"rect", seats:6, x:690,  y:210},
+    {id:"t8", label:"8",  kind:"rect", seats:6, x:350,  y:210},
+    {id:"t9", label:"9",  kind:"rect", seats:4, x:120,  y:210},
+    {id:"t10",label:"10", kind:"rect", seats:4, x:120,  y:390},
+    {id:"t11",label:"11", kind:"rect", seats:6, x:355,  y:390},
+    {id:"t12",label:"12", kind:"rect", seats:6, x:690,  y:390}
+  ];
+
+  var PROPS = [
+    {id:"dj",    label:"DJ pult",     x:30,   y:200, w:75,  h:300, vert:true},
+    {id:"buf",   label:"Büféasztal",  x:2030, y:190, w:75,  h:300, vert:true}
+  ];
+
+  var OFF_X = -14, OFF_Y = -62;
+  var PLAN_W = 2124, PLAN_H = 462;
+  var LS_KEY = "ulesrend-detti-david-v1";
+  var TOTAL_SEATS = TABLES.reduce(function(a,t){return a+t.seats;},0);
+
+  function cols(t){ return t.kind === "head" ? 2 : (t.seats <= 4 ? 2 : 3); }
+  function guestName(gid){ var i = parseInt(String(gid).slice(1),10); return NAMES[i] || "?"; }
+  function seatKey(tid,i){ return tid + ":" + i; }
+
+  // ---------- state ----------
+  var seats = Object.assign({}, DEFAULT_SEATS);
+  var selected = null;          // guest id awaiting placement
+  var history = [];
+  var query = "";
+  var zoom = 1;
+  var loaded = false;
+  var saveTimer = null;
+  var resetArmed = false;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var plan = $("plan"), list = $("list");
+
+  // ---------- build the floor plan once ----------
+  var seatEls = {};
+  function buildPlan(){
+    plan.style.width = PLAN_W + "px";
+    plan.style.height = PLAN_H + "px";
+    var frag = document.createDocumentFragment();
+
+    PROPS.forEach(function(p){
+      var d = document.createElement("div");
+      d.className = "prop" + (p.floor ? " floor" : "") + (p.vert ? " vert" : "");
+      d.style.cssText = "left:"+(p.x+OFF_X)+"px;top:"+(p.y+OFF_Y)+"px;width:"+p.w+"px;height:"+p.h+"px";
+      var s = document.createElement("span");
+      s.textContent = p.label;
+      d.appendChild(s);
+      frag.appendChild(d);
+    });
+
+    TABLES.forEach(function(t){
+      var c = cols(t);
+      var box = document.createElement("section");
+      box.className = "table" + (t.kind === "head" ? " head" : "");
+      box.style.cssText = "left:"+(t.x+OFF_X)+"px;top:"+(t.y+OFF_Y)+"px;width:"+(c*105+18)+"px";
+      box.setAttribute("aria-label", (t.kind === "head" ? "Főasztal" : t.label + ". asztal"));
+
+      var head = document.createElement("div");
+      head.className = "thead";
+      var nm = document.createElement("div");
+      nm.className = "tname";
+      nm.textContent = t.kind === "head" ? t.label : t.label;
+      var oc = document.createElement("div");
+      oc.className = "tocc";
+      oc.id = "occ-" + t.id;
+      head.appendChild(nm); head.appendChild(oc);
+      box.appendChild(head);
+
+      var grid = document.createElement("div");
+      grid.className = "seats";
+      grid.style.gridTemplateColumns = "repeat(" + c + ", 100px)";
+      for (var i = 0; i < t.seats; i++){
+        var k = seatKey(t.id, i);
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "seat empty";
+        b.dataset.seat = k;
+        b.innerHTML = '<span class="n"></span><span class="who"></span>';
+        b.querySelector(".n").textContent = String(i + 1);
+        grid.appendChild(b);
+        seatEls[k] = b;
+      }
+      box.appendChild(grid);
+      frag.appendChild(box);
+    });
+
+    plan.appendChild(frag);
+  }
+
+  // ---------- render ----------
+  function seatOf(gid){
+    for (var k in seats){ if (seats[k] === gid) return k; }
+    return null;
+  }
+
+  function tableLabelFor(seatK){
+    if (!seatK) return null;
+    var tid = seatK.split(":")[0];
+    var t = TABLES.filter(function(x){ return x.id === tid; })[0];
+    if (!t) return null;
+    return t.kind === "head" ? "Főasztal" : t.label + ". asztal";
+  }
+
+  function renderPlan(){
+    TABLES.forEach(function(t){
+      var used = 0;
+      for (var i = 0; i < t.seats; i++){
+        var k = seatKey(t.id, i);
+        var el = seatEls[k];
+        var gid = seats[k];
+        var who = el.querySelector(".who");
+        if (gid){
+          used++;
+          el.className = "seat taken";
+          who.textContent = guestName(gid);
+          el.setAttribute("draggable", "true");
+        } else {
+          el.className = "seat empty";
+          who.textContent = "üres";
+          el.setAttribute("draggable", "false");
+        }
+        if (selected && seats[k] === selected) el.classList.add("hit");
+      }
+      var occ = $("occ-" + t.id);
+      occ.textContent = used + " / " + t.seats;
+      occ.className = "tocc" + (used === t.seats ? " full" : "");
+    });
+  }
+
+  function renderList(){
+    var q = query.trim().toLowerCase();
+    var seatedRows = [], freeRows = [];
+    for (var i = 0; i < NAMES.length; i++){
+      var gid = "g" + i;
+      if (q && NAMES[i].toLowerCase().indexOf(q) === -1) continue;
+      (seatOf(gid) ? seatedRows : freeRows).push(gid);
+    }
+    list.innerHTML = "";
+
+    function group(title, count, rows, unseated){
+      var h = document.createElement("div");
+      h.className = "grouphead";
+      h.innerHTML = "<span></span><span></span>";
+      h.children[0].textContent = title;
+      h.children[1].textContent = String(count);
+      list.appendChild(h);
+      if (!rows.length){
+        var n = document.createElement("div");
+        n.className = "empty-note";
+        n.textContent = q ? "Nincs találat." : (unseated ? "Mindenkinek van helye." : "Még senki nincs leültetve.");
+        list.appendChild(n);
+        return;
+      }
+      rows.forEach(function(gid){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "guest" + (unseated ? " unseated" : "");
+        b.dataset.guest = gid;
+        b.setAttribute("draggable", "true");
+        if (selected === gid) b.dataset.sel = "1";
+        var n = document.createElement("span");
+        n.className = "gn"; n.textContent = guestName(gid);
+        var t = document.createElement("span");
+        t.className = "gt"; t.textContent = unseated ? "nincs helye" : tableLabelFor(seatOf(gid));
+        b.appendChild(n); b.appendChild(t);
+        list.appendChild(b);
+      });
+    }
+
+    group("Nincs helye", freeRows.length, freeRows, true);
+    group("Leültetve", seatedRows.length, seatedRows, false);
+  }
+
+  function renderStats(){
+    var n = Object.keys(seats).length;
+    $("statSeated").textContent = String(n);
+    $("statFree").textContent = String(TOTAL_SEATS - n);
+    $("undoBtn").disabled = history.length === 0;
+    var cue = $("cue");
+    if (selected){
+      cue.classList.add("on");
+      $("cueTxt").innerHTML = "";
+      var b = document.createElement("b");
+      b.textContent = guestName(selected);
+      $("cueTxt").appendChild(b);
+      $("cueTxt").appendChild(document.createTextNode(" — válassz egy helyet"));
+    } else {
+      cue.classList.remove("on");
+    }
+  }
+
+  function render(){ renderPlan(); renderList(); renderStats(); }
+
+  // ---------- mutations ----------
+  function pushHistory(){
+    history.push(JSON.stringify(seats));
+    if (history.length > 40) history.shift();
+  }
+
+  function place(gid, key){
+    pushHistory();
+    var prev = seatOf(gid);
+    var occupant = seats[key] || null;
+    if (prev) delete seats[prev];
+    if (occupant && prev) seats[prev] = occupant;      // swap
+    else if (occupant) delete seats[key];              // bump to unseated
+    seats[key] = gid;
+    selected = null;
+    render();
+    scheduleSave();
+  }
+
+  function clearSeat(key){
+    if (!seats[key]) return;
+    pushHistory();
+    delete seats[key];
+    render();
+    scheduleSave();
+  }
+
+  function undo(){
+    if (!history.length) return;
+    seats = JSON.parse(history.pop());
+    selected = null;
+    render();
+    scheduleSave();
+  }
+
+  // ---------- interactions ----------
+  plan.addEventListener("click", function(e){
+    var el = e.target.closest(".seat");
+    if (!el) return;
+    var key = el.dataset.seat;
+    if (selected){
+      place(selected, key);
+    } else if (seats[key]){
+      selected = seats[key];
+      render();
+    }
+  });
+
+  list.addEventListener("click", function(e){
+    var el = e.target.closest(".guest");
+    if (!el) return;
+    var gid = el.dataset.guest;
+    selected = (selected === gid) ? null : gid;
+    render();
+  });
+
+  $("cueCancel").addEventListener("click", function(){ selected = null; render(); });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && selected){ selected = null; render(); }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z"){ e.preventDefault(); undo(); }
+  });
+
+  // drag & drop
+  var dragGuest = null;
+  document.addEventListener("dragstart", function(e){
+    var g = e.target.closest("[data-guest]");
+    var s = e.target.closest(".seat.taken");
+    dragGuest = g ? g.dataset.guest : (s ? seats[s.dataset.seat] : null);
+    if (!dragGuest){ e.preventDefault(); return; }
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", dragGuest); } catch(err){}
+  });
+  document.addEventListener("dragend", function(){
+    dragGuest = null;
+    Array.prototype.forEach.call(document.querySelectorAll(".seat.drop"), function(el){ el.classList.remove("drop"); });
+  });
+  plan.addEventListener("dragover", function(e){
+    var el = e.target.closest(".seat");
+    if (!el || !dragGuest) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    el.classList.add("drop");
+  });
+  plan.addEventListener("dragleave", function(e){
+    var el = e.target.closest(".seat");
+    if (el) el.classList.remove("drop");
+  });
+  plan.addEventListener("drop", function(e){
+    var el = e.target.closest(".seat");
+    if (!el || !dragGuest) return;
+    e.preventDefault();
+    el.classList.remove("drop");
+    place(dragGuest, el.dataset.seat);
+    dragGuest = null;
+  });
+  // drag a seated guest back to the rail to unseat
+  $("rail").addEventListener("dragover", function(e){ if (dragGuest) e.preventDefault(); });
+  $("rail").addEventListener("drop", function(e){
+    if (!dragGuest) return;
+    e.preventDefault();
+    var k = seatOf(dragGuest);
+    if (k) clearSeat(k);
+    dragGuest = null;
+  });
+
+  $("search").addEventListener("input", function(e){ query = e.target.value; renderList(); });
+
+  $("undoBtn").addEventListener("click", undo);
+  $("printBtn").addEventListener("click", function(){ window.print(); });
+  $("railToggle").addEventListener("click", function(){
+    var r = $("rail");
+    r.hidden = !r.hidden;
+  });
+
+  $("autoBtn").addEventListener("click", function(){
+    var free = [];
+    for (var i = 0; i < NAMES.length; i++){ if (!seatOf("g" + i)) free.push("g" + i); }
+    if (!free.length) return;
+    pushHistory();
+    var fi = 0;
+    for (var a = 0; a < TABLES.length && fi < free.length; a++){
+      var t = TABLES[a];
+      if (t.kind === "head") continue;
+      for (var s = 0; s < t.seats && fi < free.length; s++){
+        var k = seatKey(t.id, s);
+        if (!seats[k]) seats[k] = free[fi++];
+      }
+    }
+    selected = null;
+    render();
+    scheduleSave();
+  });
+
+  $("resetBtn").addEventListener("click", function(){
+    var b = $("resetBtn");
+    if (!resetArmed){
+      resetArmed = true;
+      b.textContent = "Biztosan?";
+      setTimeout(function(){ resetArmed = false; b.textContent = "Eredeti ültetés"; }, 4000);
+      return;
+    }
+    resetArmed = false;
+    b.textContent = "Eredeti ültetés";
+    pushHistory();
+    seats = Object.assign({}, DEFAULT_SEATS);
+    selected = null;
+    render();
+    scheduleSave();
+  });
+
+  // zoom
+  function applyZoom(){
+    plan.style.transform = "scale(" + zoom + ")";
+    var sz = $("sizer");
+    sz.style.width = Math.round(PLAN_W * zoom) + "px";
+    sz.style.height = Math.round(PLAN_H * zoom) + "px";
+  }
+  function fit(){
+    var w = $("planwrap").clientWidth - 52;
+    zoom = Math.max(0.2, Math.min(1, w / PLAN_W));
+    applyZoom();
+  }
+  function initialZoom(){
+    // on a phone the whole room at once is unreadable — start legible and let it scroll
+    if (window.innerWidth < 820){ zoom = 0.55; applyZoom(); }
+    else fit();
+  }
+
+  var prevZoom = null;
+  window.addEventListener("beforeprint", function(){ prevZoom = zoom; zoom = 0.48; applyZoom(); });
+  window.addEventListener("afterprint", function(){
+    if (prevZoom !== null){ zoom = prevZoom; applyZoom(); prevZoom = null; }
+  });
+  $("zoomIn").addEventListener("click", function(){ zoom = Math.min(1.6, zoom + 0.1); applyZoom(); });
+  $("zoomOut").addEventListener("click", function(){ zoom = Math.max(0.2, zoom - 0.1); applyZoom(); });
+  $("zoomFit").addEventListener("click", fit);
+
+  // ---------- persistence ----------
+  function setSave(state, text){
+    var box = $("saveBox");
+    box.dataset.s = state;
+    $("saveTxt").textContent = text;
+  }
+
+  function snapshot(){
+    return { v: 1, updatedAt: Date.now(), seats: seats };
+  }
+
+  function writeLocal(snap){
+    try { localStorage.setItem(LS_KEY, JSON.stringify(snap)); return true; }
+    catch(e){ return false; }
+  }
+
+  function scheduleSave(){
+    if (!loaded) return;
+    setSave("saving", "Mentés…");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, 700);
+  }
+
+  function doSave(){
+    var snap = snapshot();
+    var ok = writeLocal(snap);
+    setSave(ok ? "idle" : "error", ok ? "Mentve ebben a böngészőben" : "Nem sikerült menteni");
+  }
+
+  function readLocal(){
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      var j = JSON.parse(raw);
+      return (j && j.seats) ? j : null;
+    } catch(e){ return null; }
+  }
+
+  function adopt(snap){
+    if (!snap || !snap.seats) return false;
+    var next = {};
+    for (var k in snap.seats){
+      if (seatEls[k] && /^g\d+$/.test(snap.seats[k])) next[k] = snap.seats[k];
+    }
+    seats = next;
+    return true;
+  }
+
+  // ---------- backup / restore ----------
+  $("exportBtn").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(snapshot(), null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "ulesrend-mentes.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  });
+
+  $("importBtn").addEventListener("click", function(){ $("importFile").click(); });
+  $("importFile").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var fr = new FileReader();
+    fr.onload = function(){
+      try {
+        var snap = JSON.parse(String(fr.result));
+        pushHistory();
+        if (adopt(snap)){
+          selected = null;
+          render();
+          scheduleSave();
+        } else {
+          setSave("error", "A fájl nem ülésrend-mentés");
+        }
+      } catch(err){
+        setSave("error", "A fájlt nem sikerült beolvasni");
+      }
+    };
+    fr.readAsText(f);
+    e.target.value = "";
+  });
+
+  function boot(){
+    buildPlan();
+    adopt(readLocal());
+    render();
+    initialZoom();
+    loaded = true;
+    setSave("idle", "Mentve ebben a böngészőben");
+  }
+
+  window.addEventListener("resize", function(){ /* keep manual zoom */ });
+  boot();
+})();
+</script>
+
+</body>
+</html>
